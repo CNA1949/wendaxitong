@@ -24,9 +24,9 @@ func NewRouter(service ...interface{}) *gin.Engine {
 		userDo.Use(middleware.CheckTokenMiddleware())
 		{
 			// 用户操作模块
-			userDo.GET("/deleteUser", handler.DeleteUser) // 注销账号信息
-			userDo.GET("/exit", handler.UserExit)         //退出登录
-			userDo.POST("/modify")                        // 修改个人信息
+			userDo.GET("/deleteUser", handler.DeleteUser)  // 注销账号信息
+			userDo.GET("/exit", handler.UserExit)          //退出登录
+			userDo.POST("/modify", handler.ModifyUserInfo) // 修改个人信息
 
 			follow := userDo.Group("/follow")
 			{

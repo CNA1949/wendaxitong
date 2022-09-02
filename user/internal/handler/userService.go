@@ -52,3 +52,7 @@ func (u *UserService) DeleteUser(c context.Context, request *service.UserRequest
 		StatusMessage: msg.StatusMessage,
 	}, nil
 }
+
+func (u *UserService) ModifyUserInfo(c context.Context, request *service.UserRequest) (*service.UserResponse, error) {
+	return nil, nil
+}

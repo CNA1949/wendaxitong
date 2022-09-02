@@ -122,28 +122,16 @@ func UserLogin(c *gin.Context) {
 
 // DeleteUser 注销用户信息
 func DeleteUser(c *gin.Context) {
-	token := c.GetHeader("token")
-	if token == "" {
-		c.JSON(http.StatusOK, util.JsonData{
-			Code:    codeMsg.ErrorInvalidParameter,
-			Message: "无效参数",
-			Data:    "null",
-		})
+	userName := c.MustGet("userName").(string)
+	if userName == "" {
+		c.JSON(http.StatusOK, "userName为空，参数传递错误")
 		c.Abort()
 		return
-	}
-	claims, err := util.ParseToken(token, util.AccessSecret)
-	if err != nil {
-		c.JSON(http.StatusOK, util.JsonData{
-			Code:    codeMsg.Failed,
-			Message: "Error ParseToken():" + err.Error(),
-			Data:    "null",
-		})
 	}
 
 	// 从数据库中物理删除用户信息
 	request := &service.UserRequest{
-		UserName: claims.Name,
+		UserName: userName,
 	}
 	response, err := GrpcUerServiceClient.DeleteUser(context.Background(), request)
 	if err != nil {
@@ -153,14 +141,16 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	err1 := util.DeleteARToken(claims.Name) // 用户注销后从redis中删除token信息
+	var s string = " "
+	err1 := util.DeleteARToken(userName) // 用户注销后从redis中删除token信息
 	if err1 != nil {
 		fmt.Println("DeleteARToken() err: ", err1.Error())
+		s = s + err1.Error()
 	}
 
 	c.JSON(http.StatusOK, util.JsonData{
 		Code:    response.StatusCode,
-		Message: response.StatusMessage + " " + err1.Error(),
+		Message: response.StatusMessage + s,
 		Data:    "null",
 	})
 
@@ -168,27 +158,14 @@ func DeleteUser(c *gin.Context) {
 
 // UserExit 用户退出登录
 func UserExit(c *gin.Context) {
-	token := c.GetHeader("token")
-	if token == "" {
-		c.JSON(http.StatusOK, util.JsonData{
-			Code:    codeMsg.ErrorInvalidParameter,
-			Message: "无效参数",
-			Data:    "null",
-		})
+	userName := c.MustGet("userName").(string)
+	if userName == "" {
+		c.JSON(http.StatusOK, "userName为空，参数传递错误")
 		c.Abort()
 		return
 	}
-	claims, err := util.ParseToken(token, util.AccessSecret)
-	if err != nil {
-		c.JSON(http.StatusOK, util.JsonData{
-			Code:    codeMsg.Failed,
-			Message: "Error ParseToken():" + err.Error(),
-			Data:    "null",
-		})
-		c.Abort()
-		return
-	}
-	err = util.DeleteARToken(claims.Name) // 用户退出登录从redis中删除token信息
+
+	err := util.DeleteARToken(userName) // 用户退出登录从redis中删除token信息
 	if err != nil {
 		fmt.Println("DeleteARToken() err: ", err.Error())
 		c.JSON(http.StatusOK, util.JsonData{
@@ -204,6 +181,26 @@ func UserExit(c *gin.Context) {
 		Message: "退出登录成功",
 		Data:    "null",
 	})
+}
+
+// ModifyUserInfo 修改个人信息
+func ModifyUserInfo(c *gin.Context) {
+	userName := c.MustGet("userName").(string)
+	if userName == "" {
+		c.JSON(http.StatusOK, "userName为空，参数传递错误")
+		c.Abort()
+		return
+	}
+
+	var modifyInfo service.UserRequest
+	err := c.ShouldBind(&modifyInfo)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.Abort()
+		return
+	}
+	// 测试
+	c.JSON(http.StatusOK, modifyInfo)
 }
 
 // GetAccessToken 测试辅助工具，快速获取双token中的accessToken
