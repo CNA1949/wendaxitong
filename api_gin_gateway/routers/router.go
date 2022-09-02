@@ -25,12 +25,12 @@ func NewRouter(service ...interface{}) *gin.Engine {
 		{
 			// 用户操作模块
 			userDo.POST("/deleteUser", handler.DeleteUser) // 注销账号信息
-			userDo.POST("/exit")                           //退出登录
+			userDo.GET("/exit", handler.UserExit)          //退出登录
 
 			follow := userDo.Group("/follow")
 			{
 				follow.POST("/execute") // 关注与取消关注其他用户
-				follow.GET("/list")     // 已关注的用户列表
+				follow.GET("/list")     // 获取已关注的用户列表
 			}
 
 			topic := userDo.Group("/topic")

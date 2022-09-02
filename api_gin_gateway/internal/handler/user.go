@@ -110,3 +110,12 @@ func DeleteUser(c *gin.Context) {
 		Data:    "null",
 	})
 }
+
+// UserExit 用户退出登录
+func UserExit(c *gin.Context) {
+	c.JSON(http.StatusOK, util.JsonData{
+		Code:    "2002",
+		Message: "用户已退出",
+		Data:    "null",
+	})
+}
