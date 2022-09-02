@@ -19,6 +19,8 @@ const (
 	ErrorDecryptionFailed uint64 = 10004
 	ErrorRegisterFailed   uint64 = 10005
 	ErrorLoginFailed      uint64 = 10006
+	ErrorInvalidParameter uint64 = 10007
+	ErrorInvalidToken     uint64 = 10008
 )
 
 var ErrorMessageFlags = map[uint64]string{
@@ -28,6 +30,8 @@ var ErrorMessageFlags = map[uint64]string{
 	ErrorDecryptionFailed: "解密失败",
 	ErrorRegisterFailed:   "注册失败",
 	ErrorLoginFailed:      "登录失败",
+	ErrorInvalidParameter: "无效参数",
+	ErrorInvalidToken:     "无效token",
 }
 
 // GetErrorMsg 获取error状态码对应信息

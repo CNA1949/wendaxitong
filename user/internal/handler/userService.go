@@ -42,3 +42,13 @@ func (u *UserService) UserRegister(c context.Context, request *service.UserReque
 		StatusCode:    msg.StatusCode,
 		StatusMessage: msg.StatusMessage}, nil
 }
+
+func (u *UserService) DeleteUser(c context.Context, request *service.UserRequest) (*service.UserResponse, error) {
+	var user repository.UserInfo
+	msg := user.DeleteUser(request)
+	return &service.UserResponse{
+		UserInfo:      nil,
+		StatusCode:    msg.StatusCode,
+		StatusMessage: msg.StatusMessage,
+	}, nil
+}

@@ -97,7 +97,7 @@ func (user *UserInfo) UserLogin(request *service.UserRequest) codeMsg.CodeMessag
 	var count int64
 	isExist := user.CheckUserExist(request)
 	if !isExist {
-		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用户已存在
+		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用户不存在
 	}
 	DB.Where("user_name = ?", request.UserName).First(&user).Count(&count)
 
@@ -119,4 +119,22 @@ func (user *UserInfo) UserLogin(request *service.UserRequest) codeMsg.CodeMessag
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorLoginFailed, StatusMessage: "登录失败，账号不存在"}
 	}
 
+}
+
+// DeleteUser 注销用户
+func (user *UserInfo) DeleteUser(request *service.UserRequest) codeMsg.CodeMessage {
+	isExist := user.CheckUserExist(request)
+	if !isExist {
+		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用不存在
+	}
+
+	err := DB.Where("user_name = ?", request.UserName).First(&user).Error
+	tx := DB.Begin() //开启事务
+	err = tx.Unscoped().Delete(&user).Error
+	if err != nil {
+		tx.Rollback() // 遇到错误时回滚事务
+		return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "删除失败"}
+	}
+	tx.Commit() // 提交事务
+	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "删除成功"}
 }

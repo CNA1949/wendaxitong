@@ -24,25 +24,30 @@ func NewRouter(service ...interface{}) *gin.Engine {
 		userDo.Use(middleware.CheckTokenMiddleware())
 		{
 			// 用户操作模块
-			userDo.POST("/deleteUser", handler.DeleteUser) // 注销账号信息
-			userDo.GET("/exit", handler.UserExit)          //退出登录
+			userDo.GET("/deleteUser", handler.DeleteUser) // 注销账号信息
+			userDo.GET("/exit", handler.UserExit)         //退出登录
+			userDo.POST("/modify")                        // 修改个人信息
 
 			follow := userDo.Group("/follow")
 			{
+				follow.GET("/userInfo") // 查看用户信息
 				follow.POST("/execute") // 关注与取消关注其他用户
 				follow.GET("/list")     // 获取已关注的用户列表
 			}
 
 			topic := userDo.Group("/topic")
 			{
-				topic.GET("/topicList")      // 获取话题列表
+				topic.POST("/createTopic")   // 创建话题
+				topic.GET("/deleteTopic")    //删除某个话题
 				topic.GET("/someoneTopic")   // 获取某一个话题信息
 				topic.POST("/commentTopic")  // 评论某个话题
-				topic.POST("/deleteTopic")   //删除某个话题
 				topic.POST("/deleteComment") //删除某个评论
 			}
 
 		}
+
+		// 测试辅助
+		user.POST("/getAccessToken", handler.GetAccessToken)
 	}
 	return ginRouter
 }

@@ -35,7 +35,8 @@ message UserResponse{
 // 定义服务主体
 service UserService{
   // 定义方法
-  //  rpc CheckUserExist(UserRequest) returns(UserResponse);
   rpc UserLogin(UserRequest) returns(UserResponse);
   rpc UserRegister(UserRequest) returns (UserResponse);
+  rpc DeleteUser(UserRequest) returns (UserResponse);
+  rpc ModifyUserInfo(UserRequest) returns (UserResponse);
 }

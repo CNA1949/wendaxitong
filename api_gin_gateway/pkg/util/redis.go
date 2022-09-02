@@ -57,3 +57,13 @@ func GetValueByKey(key string) (string, error) {
 	}
 	return value, nil
 }
+
+// DeleteKeyValue 删除指定key
+func DeleteKeyValue(key string) error {
+	_, err := ConnRedis.Do("del", key)
+	if err != nil {
+		fmt.Println("DeleteKey err:", err.Error())
+		return err
+	}
+	return nil
+}

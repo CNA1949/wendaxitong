@@ -19,8 +19,8 @@ type UserClaims struct {
 
 /* 自定义token密钥 */
 var (
-	accessSecret  = []byte("accessSecret")
-	refreshSecret = []byte("refreshSecret")
+	AccessSecret  = []byte("accessSecret")
+	RefreshSecret = []byte("refreshSecret")
 )
 
 const (
@@ -30,7 +30,7 @@ const (
 	RefreshTokenKeyExpireTime = 3600 //RefreshToken 过期时间1小时
 )
 
-// GenerateToken 获取token
+// GenerateToken 生成token
 func GenerateToken(userName, password string, secret []byte) (string, error) {
 	claims := UserClaims{
 		userName,
@@ -56,13 +56,13 @@ func GenerateToken(userName, password string, secret []byte) (string, error) {
 // GetARToken 获取accessToken和refreshToken
 func GetARToken(userName, password string) (string, string, error) {
 	// 获取accessToken
-	accessTokenSigned, err := GenerateToken(userName, password, accessSecret)
+	accessTokenSigned, err := GenerateToken(userName, password, AccessSecret)
 	if err != nil {
 		fmt.Println("获取accessToken失败，err:", err)
 		return "", "", err
 	}
 	// 获取refreshToken
-	refreshTokenSigned, err := GenerateToken(userName, password, refreshSecret)
+	refreshTokenSigned, err := GenerateToken(userName, password, RefreshSecret)
 	if err != nil {
 		fmt.Println("获取refreshToken失败，err:", err)
 		return "", "", err
@@ -89,7 +89,7 @@ func ParseToken(tokenString string, secret []byte) (*UserClaims, error) {
 		return secret, nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("token格式错误")
 	}
 	if claims, ok := token.Claims.(*UserClaims); ok {
 		return claims, nil
@@ -105,14 +105,14 @@ func RefreshAccessToken(userName string) (string, uint64, error) {
 		fmt.Println("GetValueByKey() err:", err.Error())
 		return "", codeMsg.ErrorInvalidToken, err
 	}
-	parseToken, err := ParseToken(rToken, refreshSecret)
+	parseToken, err := ParseToken(rToken, RefreshSecret)
 	if err != nil {
 		fmt.Println("ParseToken() err:", err.Error())
 		return "", codeMsg.Failed, err
 	}
 
 	// 刷新accessToken
-	accessTokenSigned, err := GenerateToken(userName, parseToken.Password, accessSecret)
+	accessTokenSigned, err := GenerateToken(userName, parseToken.Password, AccessSecret)
 	if err != nil {
 		fmt.Println("GenerateToken()，err:", err)
 		return "", codeMsg.Failed, err
@@ -125,4 +125,17 @@ func RefreshAccessToken(userName string) (string, uint64, error) {
 	}
 
 	return accessTokenSigned, codeMsg.SUCCESS, nil
+}
+
+// DeleteARToken 删除accessToken 和 refreshToken
+func DeleteARToken(userName string) error {
+	err := DeleteKeyValue(userName + AccessTokenKeySuffix)
+	if err != nil {
+		return err
+	}
+	err = DeleteKeyValue(userName + RefreshTokenKeySuffix)
+	if err != nil {
+		return err
+	}
+	return nil
 }
