@@ -1,0 +1,3 @@
+protoc --go_out=../service .\*.proto	//生成 *.pb.go
+protoc --go-grpc_out=../service .\*.proto   //生成*_grpc.pb.gp
+protoc --grpc-gateway_out=logtostderr=true:../service .\*.proto

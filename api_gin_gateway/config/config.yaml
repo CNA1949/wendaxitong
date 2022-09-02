@@ -1,0 +1,4 @@
+redis:
+  host: "127.0.0.1"
+  port: "6379"              #redis默认端口
+  password: "redis123456"   #本地redis永久配置了密码

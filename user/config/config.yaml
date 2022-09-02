@@ -1,0 +1,17 @@
+mysql:
+  driverName: "mysql"     # 数据库类型
+  userName: "root"        # 数据库用户名
+  password: "123456"      # 数据库登录密码
+  protocol: "tcp"         # 协议
+  host: "127.0.0.1"       # 地址
+  port: "3306"            # 端口
+  database: "wendaxitong" # 数据库名
+  charset: "utf8mb4"
+  parseTime: "True"
+  loc: "Local"
+
+
+redis:
+  host: "127.0.0.1"
+  port: "6379"              #redis默认端口
+  password: "redis123456"   #本地redis永久配置了密码
