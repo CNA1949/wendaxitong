@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"wendaxitong/api_gin_gateway/pkg/codeMsg"
 	"wendaxitong/user/internal/repository"
 	"wendaxitong/user/internal/service"
 )
@@ -54,5 +55,40 @@ func (u *UserService) DeleteUser(c context.Context, request *service.UserRequest
 }
 
 func (u *UserService) ModifyUserInfo(c context.Context, request *service.UserRequest) (*service.UserResponse, error) {
-	return nil, nil
+	var user repository.UserInfo
+	msg := user.ModifyUserInfo(request)
+	if msg.StatusCode != codeMsg.SUCCESS {
+		return &service.UserResponse{
+			StatusCode:    msg.StatusCode,
+			StatusMessage: msg.StatusMessage,
+		}, nil
+	}
+	return &service.UserResponse{
+		UserInfo: &service.UserModel{
+			UserId:   user.UserId,
+			UserName: user.UserName,
+			Password: "******",
+			Phone:    user.Phone,
+			Email:    user.Email,
+		},
+		StatusCode:    msg.StatusCode,
+		StatusMessage: msg.StatusMessage,
+	}, nil
+}
+
+func (u *UserService) GetUserIdByUserName(c context.Context, request *service.UserRequest) (*service.UserResponse, error) {
+	var user repository.UserInfo
+	msg := user.GetUserInfoByUserName(request)
+	if msg.StatusCode != codeMsg.SUCCESS {
+		return &service.UserResponse{
+			StatusCode:    msg.StatusCode,
+			StatusMessage: msg.StatusMessage,
+		}, nil
+	}
+
+	return &service.UserResponse{
+		UserInfo:      &service.UserModel{UserId: user.UserId},
+		StatusCode:    msg.StatusCode,
+		StatusMessage: msg.StatusMessage,
+	}, nil
 }

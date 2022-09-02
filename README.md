@@ -41,7 +41,7 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 
 退出登录（已完成）
 
-修改个人信息（待完成）
+修改个人信息（已完成）
 
 ### 关注与取消关注
 

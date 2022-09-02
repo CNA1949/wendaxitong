@@ -8,21 +8,19 @@ package service;
 
 // user Model
 message UserModel{
-  string userName = 1;
-  string password = 2;
-  string phone = 3;
-  string email = 4;
-  int64 num_fans = 5;
-  int64 num_idols = 6;
+  uint64  userId = 1;
+  string userName = 2;
+  string password = 3;
+  string phone = 4;
+  string email = 5;
+  uint64  num_fans = 6;
+  uint64  num_idols = 7;
 }
 
 // request model
 // 消息 传输对象
 message UserRequest{
-  string userName = 1;
-  string password = 2;
-  string phone = 3;
-  string email = 4;
+  UserModel userInfo = 1;
 }
 
 // response model
@@ -32,6 +30,7 @@ message UserResponse{
   UserModel userInfo = 3;
 }
 
+
 // 定义服务主体
 service UserService{
   // 定义方法
@@ -39,4 +38,5 @@ service UserService{
   rpc UserRegister(UserRequest) returns (UserResponse);
   rpc DeleteUser(UserRequest) returns (UserResponse);
   rpc ModifyUserInfo(UserRequest) returns (UserResponse);
+  rpc GetUserIdByUserName(UserRequest) returns (UserResponse);
 }

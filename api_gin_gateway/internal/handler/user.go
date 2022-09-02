@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"wendaxitong/api_gin_gateway/internal/service"
 	"wendaxitong/api_gin_gateway/pkg/codeMsg"
@@ -11,8 +12,11 @@ import (
 )
 
 type User struct {
+	UserId   uint64 `json:"user_id"`
 	UserName string `json:"user_name"`
 	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email"`
 }
 
 // UserRegister 用户注册
@@ -24,17 +28,12 @@ func UserRegister(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	if user.UserName == "" || user.Password == "" || user.Phone == "" || user.Email == "" {
+	if user.UserInfo.UserName == "" || user.UserInfo.Password == "" || user.UserInfo.Phone == "" || user.UserInfo.Email == "" {
 		c.JSON(http.StatusOK, gin.H{"error": "账号、密码、手机号、邮箱均不能为空"})
 		c.Abort()
 		return
 	}
-	request := &service.UserRequest{
-		UserName: user.UserName,
-		Password: user.Password,
-		Phone:    user.Phone,
-		Email:    user.Email,
-	}
+	request := &user
 	response, err := GrpcUerServiceClient.UserRegister(context.Background(), request)
 	if err != nil {
 		c.JSON(http.StatusOK, "注册失败："+err.Error())
@@ -78,8 +77,10 @@ func UserLogin(c *gin.Context) {
 	}
 
 	request := &service.UserRequest{
-		UserName: user.UserName,
-		Password: user.Password,
+		UserInfo: &service.UserModel{
+			UserName: user.UserName,
+			Password: user.Password,
+		},
 	}
 	response, err := GrpcUerServiceClient.UserLogin(context.Background(), request)
 	if err != nil {
@@ -131,8 +132,11 @@ func DeleteUser(c *gin.Context) {
 
 	// 从数据库中物理删除用户信息
 	request := &service.UserRequest{
-		UserName: userName,
+		UserInfo: &service.UserModel{
+			UserName: userName,
+		},
 	}
+
 	response, err := GrpcUerServiceClient.DeleteUser(context.Background(), request)
 	if err != nil {
 		fmt.Println("GrpcUerServiceClient.DeleteUser Error:", err.Error())
@@ -141,7 +145,7 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	var s string = " "
+	var s = " "
 	err1 := util.DeleteARToken(userName) // 用户注销后从redis中删除token信息
 	if err1 != nil {
 		fmt.Println("DeleteARToken() err: ", err1.Error())
@@ -199,8 +203,61 @@ func ModifyUserInfo(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	// 测试
-	c.JSON(http.StatusOK, modifyInfo)
+	// 根据用户名获取用户id
+	request := &service.UserRequest{
+		UserInfo: &service.UserModel{
+			UserName: userName,
+		},
+	}
+	response, err := GrpcUerServiceClient.GetUserIdByUserName(context.Background(), request)
+	if err != nil {
+		fmt.Println("GrpcUerServiceClient.GetUserIdByUserName Error:", err.Error())
+		c.JSON(http.StatusOK, err.Error())
+		c.Abort()
+		return
+	}
+
+	// 发送修改用户个人信息的请求
+	modifyInfo.UserInfo.UserId = response.UserInfo.UserId
+	request = &modifyInfo
+	response, err = GrpcUerServiceClient.ModifyUserInfo(context.Background(), request)
+	if err != nil {
+		fmt.Println("GrpcUerServiceClient.ModifyUserInfo Error:", err.Error())
+		c.JSON(http.StatusOK, err.Error())
+		c.Abort()
+		return
+	}
+
+	if modifyInfo.UserInfo.UserName != "" || modifyInfo.UserInfo.Password != "" {
+		err = util.DeleteARToken(userName) // 用户退出登录从redis中删除token信息
+		if err != nil {
+			log.Fatalln("token删除异常： ", err.Error())
+		}
+		c.JSON(http.StatusOK, util.JsonData{
+			Code:    response.StatusCode,
+			Message: response.StatusMessage + ",请重新登录",
+			Data: User{
+				UserId:   response.UserInfo.UserId,
+				UserName: response.UserInfo.UserName,
+				Password: "******",
+				Phone:    response.UserInfo.Phone,
+				Email:    response.UserInfo.Email,
+			},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, util.JsonData{
+		Code:    response.StatusCode,
+		Message: response.StatusMessage,
+		Data: User{
+			UserId:   response.UserInfo.UserId,
+			UserName: response.UserInfo.UserName,
+			Password: "******",
+			Phone:    response.UserInfo.Phone,
+			Email:    response.UserInfo.Email,
+		},
+	})
 }
 
 // GetAccessToken 测试辅助工具，快速获取双token中的accessToken

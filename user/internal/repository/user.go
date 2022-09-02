@@ -9,12 +9,12 @@ import (
 )
 
 type UserInfo struct {
-	UserId        uint      `gorm:"primary_key;auto_increment" json:"user_id"`
+	UserId        uint64    `gorm:"primary_key;auto_increment" json:"user_id"`
 	UserName      string    `gorm:"not null;unique" json:"user_name"`
 	Phone         string    `json:"phone"`
 	Email         string    `json:"email"`
-	NumFans       uint      `json:"num_fans"`
-	NumIdols      uint      `json:"num_idols"`
+	NumFans       uint64    `json:"num_fans"`
+	NumIdols      uint64    `json:"num_idols"`
 	Password      string    `gorm:"not null" json:"password"`
 	CreatedAt     time.Time `json:"created_at"`      // 用户注册时间
 	UpdatedAt     time.Time `json:"updated_at"`      // 用户信息更新时间
@@ -53,8 +53,7 @@ func (user *UserInfo) CheckUserExist(request *service.UserRequest) bool {
 	//	return false
 	//}
 	var count int64
-	var userInfo UserInfo
-	DB.Where("user_name = ?", request.UserName).First(&userInfo).Count(&count)
+	DB.Where("user_name = ?", request.UserInfo.UserName).First(user).Count(&count)
 	fmt.Println("count:", count)
 	if count != 0 {
 		return true
@@ -69,21 +68,21 @@ func (user *UserInfo) RegisterUserInfo(request *service.UserRequest) codeMsg.Cod
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserExist)} // 该用户已存在
 	}
 	{
-		user.UserName = request.UserName
-		user.Phone = request.Phone
-		user.Email = request.Email
+		user.UserName = request.UserInfo.UserName
+		user.Phone = request.UserInfo.Phone
+		user.Email = request.UserInfo.Email
 		user.NumFans = 0
 		user.NumIdols = 0
 	}
 
-	b, msg := user.SetPassword(request.Password) // 密码加密
+	b, msg := user.SetPassword(request.UserInfo.Password) // 密码加密
 	if !b {
 		return msg // 加密失败
 	}
 
 	// 注册用户信息
 	tx := DB.Begin() //开启事务
-	err := tx.Create(&user).Error
+	err := tx.Create(user).Error
 	if err != nil {
 		tx.Rollback()                                                                                                                        // 遇到错误时回滚事务
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorRegisterFailed, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorRegisterFailed)} // 注册失败
@@ -99,13 +98,13 @@ func (user *UserInfo) UserLogin(request *service.UserRequest) codeMsg.CodeMessag
 	if !isExist {
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用户不存在
 	}
-	DB.Where("user_name = ?", request.UserName).First(&user).Count(&count)
+	DB.Where("user_name = ?", request.UserInfo.UserName).First(user).Count(&count)
 
 	if count != 0 {
-		b, _ := user.CheckPassword(request.Password)
+		b, _ := user.CheckPassword(request.UserInfo.Password)
 		if b {
 			tx := DB.Begin()
-			err := tx.Model(&UserInfo{}).Where("user_name = ?", request.UserName).Update("last_login_time", time.Now()).Error
+			err := tx.Model(&UserInfo{}).Where("user_name = ?", request.UserInfo.UserName).Update("last_login_time", time.Now()).Error
 			if err != nil {
 				tx.Rollback()                                                                                // 遇到错误时回滚事务
 				return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorLoginFailed, StatusMessage: err.Error()} // 登录失败，操作数据库错误
@@ -128,13 +127,85 @@ func (user *UserInfo) DeleteUser(request *service.UserRequest) codeMsg.CodeMessa
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用不存在
 	}
 
-	err := DB.Where("user_name = ?", request.UserName).First(&user).Error
+	err := DB.Where("user_name = ?", request.UserInfo.UserName).First(user).Error
 	tx := DB.Begin() //开启事务
-	err = tx.Unscoped().Delete(&user).Error
+	err = tx.Unscoped().Delete(user).Error
 	if err != nil {
 		tx.Rollback() // 遇到错误时回滚事务
 		return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "删除失败"}
 	}
 	tx.Commit() // 提交事务
 	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "删除成功"}
+}
+
+// ModifyUserInfo 修改用户个人信息
+func (user *UserInfo) ModifyUserInfo(request *service.UserRequest) codeMsg.CodeMessage {
+	var err error
+
+	if request.UserInfo.UserName != "" {
+		isExist := user.CheckUserExist(request)
+		if isExist {
+			return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserExist)} // 该用已存在
+		}
+		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "user_name", request.UserInfo.UserName)
+		if err != nil {
+			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update user_name:" + err.Error()}
+		}
+	}
+
+	if request.UserInfo.Password != "" {
+		user.SetPassword(request.UserInfo.Password)
+		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "password", user.Password)
+		if err != nil {
+			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update password:" + err.Error()}
+		}
+	}
+
+	if request.UserInfo.Phone != "" {
+		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "phone", request.UserInfo.Phone)
+		if err != nil {
+			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update phone:" + err.Error()}
+		}
+	}
+
+	if request.UserInfo.Email != "" {
+		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "email", request.UserInfo.Email)
+		if err != nil {
+			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update email:" + err.Error()}
+		}
+	}
+
+	msg := user.GetUserInfoByUserId(request)
+	if msg.StatusCode != codeMsg.SUCCESS {
+		return msg
+	}
+
+	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "修改成功"}
+}
+
+// GetUserInfoByUserName 根据用户名获取用户信息
+func (user *UserInfo) GetUserInfoByUserName(request *service.UserRequest) codeMsg.CodeMessage {
+	isExist := user.CheckUserExist(request)
+	if !isExist {
+		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用不存在
+	}
+	err := DB.Where("user_name = ?", request.UserInfo.UserName).First(user).Error
+	if err != nil {
+		return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: err.Error()}
+	}
+	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "获取成功"}
+}
+
+// GetUserInfoByUserId 根据用户ID获取用户信息
+func (user *UserInfo) GetUserInfoByUserId(request *service.UserRequest) codeMsg.CodeMessage {
+	var count int64
+	err := DB.Where("user_id = ?", request.UserInfo.UserId).First(user).Count(&count).Error
+	if count == 0 {
+		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用不存在
+	}
+
+	if err != nil {
+		return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: err.Error()}
+	}
+	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "获取成功"}
 }
