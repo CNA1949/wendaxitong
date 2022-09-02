@@ -1,12 +1,9 @@
 package main
 
-import (
-	"fmt"
-	"wendaxitong/user/config"
-)
+/*
+	该文件用于测试
+*/
 
 func main() {
-	var config config.Configuration
-	config.GetMysqlConfig()
-	fmt.Println(config.MysqlConfig)
+
 }

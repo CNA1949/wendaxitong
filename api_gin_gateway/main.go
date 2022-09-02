@@ -1,5 +1,8 @@
 package main
 
+/*
+	该文件用于测试
+*/
 import (
 	"fmt"
 	"wendaxitong/api_gin_gateway/pkg/util"
