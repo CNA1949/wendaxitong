@@ -30,18 +30,20 @@ func NewRouter(service ...interface{}) *gin.Engine {
 
 			follow := userDo.Group("/follow")
 			{
-				follow.GET("/userInfo") // 查看用户信息
-				follow.POST("/execute") // 关注与取消关注其他用户
-				follow.GET("/list")     // 获取已关注的用户列表
+				follow.POST("/userInfo")    // 查看用户信息
+				follow.POST("/following")   // 关注与取消关注其他用户
+				follow.GET("/followedList") // 获取已关注的所有用户
 			}
 
-			topic := userDo.Group("/topic")
+			interact := userDo.Group("/interact")
 			{
-				topic.POST("/createTopic")   // 创建话题
-				topic.GET("/deleteTopic")    //删除某个话题
-				topic.GET("/someoneTopic")   // 获取某一个话题信息
-				topic.POST("/commentTopic")  // 评论某个话题
-				topic.POST("/deleteComment") //删除某个评论
+				interact.POST("/createTopic")   // 创建话题
+				interact.POST("/deleteTopic")   //删除某个话题
+				interact.POST("/someoneTopic")  // 获取话题的具体信息
+				interact.POST("/commentTopic")  // 评论某个话题
+				interact.POST("/deleteComment") //删除某个评论
+				interact.POST("/likesTopic")    //点赞话题
+				interact.POST("/likesComment")  // 点赞评论
 			}
 
 		}
