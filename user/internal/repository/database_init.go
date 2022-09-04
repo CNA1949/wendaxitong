@@ -11,15 +11,6 @@ import (
 
 var DB *gorm.DB
 
-const (
-	USERNAME = "root"                                     //数据库用户名
-	PASSWORD = "123456"                                   // 数据库登录密码
-	PROTOCOL = "tcp"                                      //协议
-	ADDRESS  = "localhost:3306"                           //地址
-	DBNAME   = "wendaxitong"                              //数据库名
-	PARAMS   = "charset=utf8mb4&parseTime=True&loc=Local" //其它参数
-)
-
 func ConnectMysqlDatabase() error {
 	var config config.Configuration
 	config.GetConfig()
