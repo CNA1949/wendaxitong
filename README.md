@@ -18,7 +18,7 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 - 用户可以删除或修改自己发布的问题或回答
 - 实现点赞功能
 - 实现关注功能
-- 使用rpc完成网关和服务发现功能实现HTTP调用
+- 使用grpc完成网关
 - 使用redis作为缓存
 
 	
@@ -43,7 +43,9 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 
 修改个人信息（已完成）
 
-用户查看其他用户信息（已完成）
+查询用户基本信息（已完成）
+
+
 
 ### 关注与取消关注
 
@@ -57,37 +59,25 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 
 ### 互动
 
-创建话题（待完成）
+创建话题（已完成）
 
+删除话题（已完成）
 
+评论话题（已完成）
 
-删除话题（待完成）
+删除评论（已完成）
 
+点赞话题或评论（已完成）
 
+查询用户所有话题（已完成）
 
-获取话题具体信息（待完成）
-
-
-
-评论话题（待完成）
-
-
-
-删除评论（待完成）
-
-
-
-点赞话题（待完成）
-
-
-
-点赞评论（待完成）
+查询用户所有评论（回复）（已完成）
 
 
 
 ## 数据库设计
 
-### 用户信息表
+### 用户信息表（user_infos）
 
 |    字段名称     | 数据类型 |   null   | 唯一性 |  键  |       说明       |
 | :-------------: | :------: | :------: | :----: | :--: | :--------------: |
@@ -101,17 +91,29 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 |    password     | varchar  | not null |        |      |     用户密码     |
 |   fans_names    | varchar  |   null   |        |      |     用户粉丝     |
 |   idols_names   | varchar  |   null   |        |      |    关注的用户    |
-|   created_at    | varchar  | not null |        |      |   用户注册时间   |
-|   updated_at    | varchar  | not null |        |      | 用户信息更新时间 |
-| last_login_time | varchar  | not null |        |      | 用户最近登录时间 |
+|   created_at    | datetime | not null |        |      |   用户注册时间   |
+|   updated_at    | datetime | not null |        |      | 用户信息更新时间 |
+| last_login_time | datetime | not null |        |      | 用户最近登录时间 |
 
 
 
 
 
-### 关注信息表
+### 话题信息表（topic_infos）
 
 
+
+|   字段名称   | 数据类型 |   null   | 唯一性 |  键  |                         说明                         |
+| :----------: | :------: | :------: | :----: | :--: | :--------------------------------------------------: |
+|      id      |   int    | not null | unique | 主键 |                        记录id                        |
+|  user_name   | varchar  | not null |        |      |                        用户名                        |
+|   content    | varchar  |   null   |        |      |                         内容                         |
+| content_type | varchar  |   null   |        |      | 内容类型（1001：话题题目；1002：话题评论或评论回复） |
+|  parent_id   |   int    |   null   |        |      |   父内容id（一级）（0代表当前内容节点为话题题目）    |
+|   root_id    |   int    |   null   |        |      |                       根内容id                       |
+|  num_likes   |   int    |   null   |        |      |                        点赞数                        |
+| likes_names  | varchar  | not null |        |      |                     点赞用户姓名                     |
+|  created_at  | datetime |   null   |        |      |                       创建时间                       |
 
 
 

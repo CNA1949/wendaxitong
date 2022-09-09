@@ -1,15 +1,14 @@
 package main
 
-/*
-	该文件用于测试
-*/
 import (
 	"fmt"
-	"wendaxitong/user/internal/repository"
+	"strconv"
+	"strings"
 )
 
 func main() {
-	repository.ConnectMysqlDatabase()
-	err := repository.UpdateValueByName("user_name", ",cna2", &repository.UserInfo{}, "num_fans", 4)
-	fmt.Println(err)
+	s := "1,2,3,4"
+	ss := strings.Split(s, ",")
+	fmt.Println(ss)
+	fmt.Println(strconv.Atoi(ss[0]))
 }

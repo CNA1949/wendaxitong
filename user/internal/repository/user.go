@@ -58,33 +58,27 @@ func (user *UserInfo) CheckPassword(password string) (bool, codeMsg.CodeMessage)
  */
 
 // CheckUserExist 检查用户是否存在
-func (user *UserInfo) CheckUserExist(userName string) bool {
+func (user *UserInfo) CheckUserExist(userName string) (bool, UserInfo) {
 	var u UserInfo
-	//err := DB.Where("user_name = ?", request.UserName).First(&user).Error
-	//if err == gorm.ErrRecordNotFound {
-	//	return false
-	//}
 	var count int64
 	DB.Where("user_name = ?", userName).First(&u).Count(&count)
 	if count != 0 {
-		return true
+		return true, u
 	}
-	return false
+	return false, UserInfo{}
 }
 
 // RegisterUserInfo 用户注册
 func (user *UserInfo) RegisterUserInfo(request *service.UserRequest) codeMsg.CodeMessage {
-	isExist := user.CheckUserExist(request.UserInfo.UserName)
+	isExist, _ := user.CheckUserExist(request.UserInfo.UserName)
 	if isExist {
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserExist)} // 该用户已存在
 	}
-	{
-		user.UserName = request.UserInfo.UserName
-		user.Phone = request.UserInfo.Phone
-		user.Email = request.UserInfo.Email
-		user.NumFans = 0
-		user.NumIdols = 0
-	}
+	user.UserName = request.UserInfo.UserName
+	user.Phone = request.UserInfo.Phone
+	user.Email = request.UserInfo.Email
+	user.NumFans = 0
+	user.NumIdols = 0
 
 	b, msg := user.SetPassword(request.UserInfo.Password) // 密码加密
 	if !b {
@@ -105,10 +99,11 @@ func (user *UserInfo) RegisterUserInfo(request *service.UserRequest) codeMsg.Cod
 // UserLogin 用户登录
 func (user *UserInfo) UserLogin(request *service.UserRequest) codeMsg.CodeMessage {
 	var count int64
-	isExist := user.CheckUserExist(request.UserInfo.UserName)
+	isExist, _ := user.CheckUserExist(request.UserInfo.UserName)
 	if !isExist {
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用户不存在
 	}
+
 	DB.Where("user_name = ?", request.UserInfo.UserName).First(user).Count(&count)
 
 	if count != 0 {
@@ -133,7 +128,7 @@ func (user *UserInfo) UserLogin(request *service.UserRequest) codeMsg.CodeMessag
 
 // DeleteUser 注销用户
 func (user *UserInfo) DeleteUser(request *service.UserRequest) codeMsg.CodeMessage {
-	isExist := user.CheckUserExist(request.UserInfo.UserName)
+	isExist, _ := user.CheckUserExist(request.UserInfo.UserName)
 	if !isExist {
 		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用不存在
 	}
@@ -150,17 +145,16 @@ func (user *UserInfo) DeleteUser(request *service.UserRequest) codeMsg.CodeMessa
 }
 
 // ModifyUserInfo 修改用户个人信息
-func (user *UserInfo) ModifyUserInfo(request *service.UserRequest) codeMsg.CodeMessage {
+func (user *UserInfo) ModifyUserInfo(request *service.UserRequest) (UserInfo, codeMsg.CodeMessage) {
 	var err error
-
 	if request.UserInfo.UserName != "" {
-		isExist := user.CheckUserExist(request.UserInfo.UserName)
+		isExist, _ := user.CheckUserExist(request.UserInfo.UserName)
 		if isExist {
-			return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserExist)} // 该用已存在
+			return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserExist)} // 该用已存在
 		}
 		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "user_name", request.UserInfo.UserName)
 		if err != nil {
-			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update user_name:" + err.Error()}
+			return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update user_name:" + err.Error()}
 		}
 	}
 
@@ -168,57 +162,59 @@ func (user *UserInfo) ModifyUserInfo(request *service.UserRequest) codeMsg.CodeM
 		user.SetPassword(request.UserInfo.Password)
 		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "password", user.Password)
 		if err != nil {
-			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update password:" + err.Error()}
+			return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update password:" + err.Error()}
 		}
 	}
 
 	if request.UserInfo.Phone != "" {
 		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "phone", request.UserInfo.Phone)
 		if err != nil {
-			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update phone:" + err.Error()}
+			return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update phone:" + err.Error()}
 		}
 	}
 
 	if request.UserInfo.Email != "" {
 		err = UpdateValueById("user_id", request.UserInfo.UserId, &UserInfo{}, "email", request.UserInfo.Email)
 		if err != nil {
-			return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update email:" + err.Error()}
+			return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: "update email:" + err.Error()}
 		}
 	}
 
-	msg := user.GetUserInfoByUserId(request)
+	u, msg := user.GetUserInfoByUserId(request)
 	if msg.StatusCode != codeMsg.SUCCESS {
-		return msg
+		return UserInfo{}, msg
 	}
 
-	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "修改成功"}
+	return u, codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "修改成功"}
 }
 
 // GetUserInfoByUserName 根据用户名获取用户信息
-func (user *UserInfo) GetUserInfoByUserName(request *service.UserRequest) codeMsg.CodeMessage {
-	isExist := user.CheckUserExist(request.UserInfo.UserName)
+func (user *UserInfo) GetUserInfoByUserName(request *service.UserRequest) (UserInfo, codeMsg.CodeMessage) {
+	var u UserInfo
+	isExist, _ := user.CheckUserExist(request.UserInfo.UserName)
 	if !isExist {
-		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用不存在
+		return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用户不存在
 	}
-	err := DB.Where("user_name = ?", request.UserInfo.UserName).First(user).Error
+	err := DB.Where("user_name = ?", request.UserInfo.UserName).First(&u).Error
 	if err != nil {
-		return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: err.Error()}
+		return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: err.Error()}
 	}
-	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "查询成功"}
+	return u, codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "查询成功"}
 }
 
 // GetUserInfoByUserId 根据用户ID获取用户信息
-func (user *UserInfo) GetUserInfoByUserId(request *service.UserRequest) codeMsg.CodeMessage {
+func (user *UserInfo) GetUserInfoByUserId(request *service.UserRequest) (UserInfo, codeMsg.CodeMessage) {
 	var count int64
-	err := DB.Where("user_id = ?", request.UserInfo.UserId).First(user).Count(&count).Error
+	var u UserInfo
+	err := DB.Where("user_id = ?", request.UserInfo.UserId).First(&u).Count(&count).Error
 	if count == 0 {
-		return codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用不存在
+		return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.ErrorUserNotExist, StatusMessage: codeMsg.GetErrorMsg(codeMsg.ErrorUserNotExist)} // 该用户不存在
 	}
 
 	if err != nil {
-		return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: err.Error()}
+		return UserInfo{}, codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: err.Error()}
 	}
-	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "获取成功"}
+	return u, codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "获取成功"}
 }
 
 /**
@@ -230,7 +226,7 @@ func (user *UserInfo) GetUserInfoByUserId(request *service.UserRequest) codeMsg.
 // GetIdolsNames 获取所有关注用户的用户名(map数据类型)
 func (user *UserInfo) GetIdolsNames(userName string) (map[string]interface{}, error) {
 	var u UserInfo
-	isExist := user.CheckUserExist(userName)
+	isExist, _ := user.CheckUserExist(userName)
 	if !isExist {
 		return nil, errors.New("该用户不存在")
 	}
@@ -250,7 +246,7 @@ func (user *UserInfo) GetIdolsNames(userName string) (map[string]interface{}, er
 // GetFansNames 获取所有粉丝的用户名(map数据类型)
 func (user *UserInfo) GetFansNames(userName string) (map[string]interface{}, error) {
 	var u UserInfo
-	isExist := user.CheckUserExist(userName)
+	isExist, _ := user.CheckUserExist(userName)
 	if !isExist {
 		return nil, errors.New("该用户不存在")
 	}
@@ -371,11 +367,11 @@ func (user *UserInfo) deleteFan(userName string, fanName string) error {
 
 // IsFollowedUser 判断该用户是否已关注
 func (user *UserInfo) IsFollowedUser(userName string, idolName string) (map[string]interface{}, bool, error) {
-	isExist := user.CheckUserExist(userName)
+	isExist, _ := user.CheckUserExist(userName)
 	if !isExist {
 		return nil, false, errors.New("该用户不存在")
 	}
-	isExist = user.CheckUserExist(idolName)
+	isExist, _ = user.CheckUserExist(idolName)
 	if !isExist {
 		return nil, false, errors.New("关注的用户不存在")
 	}

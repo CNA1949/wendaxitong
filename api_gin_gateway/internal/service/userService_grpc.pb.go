@@ -22,14 +22,19 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	// 定义方法
 	UserLogin(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	UserRegister(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	DeleteUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	ModifyUserInfo(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
-	GetUserIdByUserName(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	GetUserInfoByUserName(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	FollowUser(ctx context.Context, in *UserRequest2, opts ...grpc.CallOption) (*UserResponse, error)
+	CreateTopic(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error)
+	DeleteTopic(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error)
+	CommentTopic(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error)
+	DeleteComment(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error)
+	LikesTopicOrComment(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error)
+	QueryTopicInfo(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error)
+	QueryCommentInfo(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error)
 }
 
 type userServiceClient struct {
@@ -76,15 +81,6 @@ func (c *userServiceClient) ModifyUserInfo(ctx context.Context, in *UserRequest,
 	return out, nil
 }
 
-func (c *userServiceClient) GetUserIdByUserName(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
-	out := new(UserResponse)
-	err := c.cc.Invoke(ctx, "/service.UserService/GetUserIdByUserName", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *userServiceClient) GetUserInfoByUserName(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, "/service.UserService/GetUserInfoByUserName", in, out, opts...)
@@ -103,18 +99,86 @@ func (c *userServiceClient) FollowUser(ctx context.Context, in *UserRequest2, op
 	return out, nil
 }
 
+func (c *userServiceClient) CreateTopic(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error) {
+	out := new(TopicResponse)
+	err := c.cc.Invoke(ctx, "/service.UserService/CreateTopic", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) DeleteTopic(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error) {
+	out := new(TopicResponse)
+	err := c.cc.Invoke(ctx, "/service.UserService/DeleteTopic", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) CommentTopic(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error) {
+	out := new(TopicResponse)
+	err := c.cc.Invoke(ctx, "/service.UserService/CommentTopic", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) DeleteComment(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error) {
+	out := new(TopicResponse)
+	err := c.cc.Invoke(ctx, "/service.UserService/DeleteComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) LikesTopicOrComment(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error) {
+	out := new(TopicResponse)
+	err := c.cc.Invoke(ctx, "/service.UserService/LikesTopicOrComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) QueryTopicInfo(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error) {
+	out := new(TopicResponse)
+	err := c.cc.Invoke(ctx, "/service.UserService/QueryTopicInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) QueryCommentInfo(ctx context.Context, in *TopicRequest, opts ...grpc.CallOption) (*TopicResponse, error) {
+	out := new(TopicResponse)
+	err := c.cc.Invoke(ctx, "/service.UserService/QueryCommentInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	// 定义方法
 	UserLogin(context.Context, *UserRequest) (*UserResponse, error)
 	UserRegister(context.Context, *UserRequest) (*UserResponse, error)
 	DeleteUser(context.Context, *UserRequest) (*UserResponse, error)
 	ModifyUserInfo(context.Context, *UserRequest) (*UserResponse, error)
-	GetUserIdByUserName(context.Context, *UserRequest) (*UserResponse, error)
 	GetUserInfoByUserName(context.Context, *UserRequest) (*UserResponse, error)
 	FollowUser(context.Context, *UserRequest2) (*UserResponse, error)
+	CreateTopic(context.Context, *TopicRequest) (*TopicResponse, error)
+	DeleteTopic(context.Context, *TopicRequest) (*TopicResponse, error)
+	CommentTopic(context.Context, *TopicRequest) (*TopicResponse, error)
+	DeleteComment(context.Context, *TopicRequest) (*TopicResponse, error)
+	LikesTopicOrComment(context.Context, *TopicRequest) (*TopicResponse, error)
+	QueryTopicInfo(context.Context, *TopicRequest) (*TopicResponse, error)
+	QueryCommentInfo(context.Context, *TopicRequest) (*TopicResponse, error)
 	MustEmbedUnimplementedUserServiceServer()
 }
 
@@ -134,14 +198,32 @@ func (UnimplementedUserServiceServer) DeleteUser(context.Context, *UserRequest) 
 func (UnimplementedUserServiceServer) ModifyUserInfo(context.Context, *UserRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ModifyUserInfo not implemented")
 }
-func (UnimplementedUserServiceServer) GetUserIdByUserName(context.Context, *UserRequest) (*UserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserIdByUserName not implemented")
-}
 func (UnimplementedUserServiceServer) GetUserInfoByUserName(context.Context, *UserRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfoByUserName not implemented")
 }
 func (UnimplementedUserServiceServer) FollowUser(context.Context, *UserRequest2) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FollowUser not implemented")
+}
+func (UnimplementedUserServiceServer) CreateTopic(context.Context, *TopicRequest) (*TopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTopic not implemented")
+}
+func (UnimplementedUserServiceServer) DeleteTopic(context.Context, *TopicRequest) (*TopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTopic not implemented")
+}
+func (UnimplementedUserServiceServer) CommentTopic(context.Context, *TopicRequest) (*TopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommentTopic not implemented")
+}
+func (UnimplementedUserServiceServer) DeleteComment(context.Context, *TopicRequest) (*TopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
+}
+func (UnimplementedUserServiceServer) LikesTopicOrComment(context.Context, *TopicRequest) (*TopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LikesTopicOrComment not implemented")
+}
+func (UnimplementedUserServiceServer) QueryTopicInfo(context.Context, *TopicRequest) (*TopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryTopicInfo not implemented")
+}
+func (UnimplementedUserServiceServer) QueryCommentInfo(context.Context, *TopicRequest) (*TopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryCommentInfo not implemented")
 }
 func (UnimplementedUserServiceServer) MustEmbedUnimplementedUserServiceServer() {}
 
@@ -228,24 +310,6 @@ func _UserService_ModifyUserInfo_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_GetUserIdByUserName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetUserIdByUserName(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/service.UserService/GetUserIdByUserName",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserIdByUserName(ctx, req.(*UserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _UserService_GetUserInfoByUserName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserRequest)
 	if err := dec(in); err != nil {
@@ -282,6 +346,132 @@ func _UserService_FollowUser_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_CreateTopic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CreateTopic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.UserService/CreateTopic",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CreateTopic(ctx, req.(*TopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_DeleteTopic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeleteTopic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.UserService/DeleteTopic",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeleteTopic(ctx, req.(*TopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_CommentTopic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CommentTopic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.UserService/CommentTopic",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CommentTopic(ctx, req.(*TopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_DeleteComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeleteComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.UserService/DeleteComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeleteComment(ctx, req.(*TopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_LikesTopicOrComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).LikesTopicOrComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.UserService/LikesTopicOrComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).LikesTopicOrComment(ctx, req.(*TopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_QueryTopicInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).QueryTopicInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.UserService/QueryTopicInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).QueryTopicInfo(ctx, req.(*TopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_QueryCommentInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).QueryCommentInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.UserService/QueryCommentInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).QueryCommentInfo(ctx, req.(*TopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -306,16 +496,40 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_ModifyUserInfo_Handler,
 		},
 		{
-			MethodName: "GetUserIdByUserName",
-			Handler:    _UserService_GetUserIdByUserName_Handler,
-		},
-		{
 			MethodName: "GetUserInfoByUserName",
 			Handler:    _UserService_GetUserInfoByUserName_Handler,
 		},
 		{
 			MethodName: "FollowUser",
 			Handler:    _UserService_FollowUser_Handler,
+		},
+		{
+			MethodName: "CreateTopic",
+			Handler:    _UserService_CreateTopic_Handler,
+		},
+		{
+			MethodName: "DeleteTopic",
+			Handler:    _UserService_DeleteTopic_Handler,
+		},
+		{
+			MethodName: "CommentTopic",
+			Handler:    _UserService_CommentTopic_Handler,
+		},
+		{
+			MethodName: "DeleteComment",
+			Handler:    _UserService_DeleteComment_Handler,
+		},
+		{
+			MethodName: "LikesTopicOrComment",
+			Handler:    _UserService_LikesTopicOrComment_Handler,
+		},
+		{
+			MethodName: "QueryTopicInfo",
+			Handler:    _UserService_QueryTopicInfo_Handler,
+		},
+		{
+			MethodName: "QueryCommentInfo",
+			Handler:    _UserService_QueryCommentInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

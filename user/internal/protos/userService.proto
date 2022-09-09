@@ -8,18 +8,29 @@ package service;
 
 // user Model
 message UserModel{
-  uint64  userId = 1;
+  uint64 userId = 1;
   string userName = 2;
   string password = 3;
   string phone = 4;
   string email = 5;
-  uint64  num_fans = 6;
-  uint64  num_idols = 7;
+  uint64 num_fans = 6;
+  uint64 num_idols = 7;
   uint64 num_topic = 8;
   string fans_names = 9;
   string idols_names = 10;
 }
 
+message TopicModel{
+  uint64 id = 1;
+  string user_name = 2;
+  string content = 3;
+  string content_type = 4;
+  uint64 parent_id = 5;
+  uint64 root_id = 6;
+  uint64 num_likes = 7;
+  string likes_names = 8;
+  string remarks = 9;
+}
 
 
 // request model
@@ -33,6 +44,10 @@ message UserRequest2{
   uint64 choose = 2;
 }
 
+message TopicRequest{
+  TopicModel topicInfo = 1;
+}
+
 // response model
 message UserResponse{
   uint64 status_code = 1;
@@ -40,18 +55,29 @@ message UserResponse{
   UserModel userInfo = 3;
 }
 
+message TopicResponse{
+  uint64 status_code = 1;
+  string status_message = 2;
+  repeated TopicModel topicInfo = 3;
+}
 
 
 
 // 定义服务主体
 service UserService{
-  // 定义方法
-  rpc UserLogin(UserRequest) returns(UserResponse);
-  rpc UserRegister(UserRequest) returns (UserResponse);
-  rpc DeleteUser(UserRequest) returns (UserResponse);
-  rpc ModifyUserInfo(UserRequest) returns (UserResponse);
-  rpc GetUserIdByUserName(UserRequest) returns (UserResponse);
+  rpc UserLogin(UserRequest) returns(UserResponse);// 用户登录
+  rpc UserRegister(UserRequest) returns (UserResponse);// 用户注册
+  rpc DeleteUser(UserRequest) returns (UserResponse); // 注销用户（删除）
+  rpc ModifyUserInfo(UserRequest) returns (UserResponse); // 修改用户基本信息
 
-  rpc GetUserInfoByUserName(UserRequest) returns (UserResponse);
+  rpc GetUserInfoByUserName(UserRequest) returns (UserResponse);  // 通过用户名获取用户信息
   rpc FollowUser(UserRequest2) returns (UserResponse); // 关注或取消关注
+
+  rpc CreateTopic(TopicRequest) returns (TopicResponse);  // 创建话题
+  rpc DeleteTopic(TopicRequest) returns (TopicResponse); // 删除话题
+  rpc CommentTopic(TopicRequest) returns (TopicResponse); // 评论话题
+  rpc DeleteComment(TopicRequest) returns (TopicResponse); // 删除评论
+  rpc LikesTopicOrComment(TopicRequest) returns (TopicResponse); // 点赞/取消点赞话题或评论
+  rpc QueryTopicInfo(TopicRequest) returns (TopicResponse); // 查询用户所有话题信息
+  rpc QueryCommentInfo(TopicRequest) returns (TopicResponse); // 查询用户所有评论信息
 }

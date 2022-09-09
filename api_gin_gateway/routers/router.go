@@ -14,9 +14,11 @@ func NewRouter(service ...interface{}) *gin.Engine {
 		{
 			{
 				// 用户服务
-				user.POST("/login", handler.UserLogin)             // 用户登录
-				user.POST("/register", handler.UserRegister)       // 用户注册
-				user.POST("/queryUserInfo", handler.QueryUserInfo) // 用户查询某个其他用户的信息
+				user.POST("/login", handler.UserLogin)                   // 用户登录
+				user.POST("/register", handler.UserRegister)             // 用户注册
+				user.POST("/queryUserInfo", handler.QueryUserInfo)       // 查询用户基本信息
+				user.POST("/queryTopicInfo", handler.QueryTopicInfo)     // 查询用户所有话题
+				user.POST("/queryCommentInfo", handler.QueryCommentInfo) // 查询用户所有评论信息
 				//测试辅助
 				user.POST("/getAccessToken", handler.GetAccessToken)
 			}
@@ -38,13 +40,12 @@ func NewRouter(service ...interface{}) *gin.Engine {
 
 				interact := userDo.Group("/interact")
 				{
-					interact.POST("/createTopic")   // 创建话题
-					interact.POST("/deleteTopic")   //删除某个话题
-					interact.POST("/someoneTopic")  // 获取话题的具体信息
-					interact.POST("/commentTopic")  // 评论某个话题
-					interact.POST("/deleteComment") //删除某个评论
-					interact.POST("/likesTopic")    //点赞话题
-					interact.POST("/likesComment")  // 点赞评论
+					interact.POST("/createTopic", handler.CreateTopic)     // 创建话题
+					interact.POST("/deleteTopic", handler.DeleteTopic)     //删除某个话题
+					interact.POST("/someoneTopic")                         // 获取话题的具体信息
+					interact.POST("/commentTopic", handler.CommentTopic)   // 评论某个话题
+					interact.POST("/deleteComment", handler.DeleteComment) //删除某个评论
+					interact.POST("/likes", handler.LikesTopicOrComment)   //点赞/取消点赞话题或评论
 				}
 
 			}

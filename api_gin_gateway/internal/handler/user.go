@@ -29,6 +29,7 @@ type QUser struct {
 	UserName string `json:"user_name"`
 	NumFans  uint64 `json:"num_fans"`
 	NumIdols uint64 `json:"num_idols"`
+	NumTopic uint64 `json:"num_topic"`
 }
 
 type Follow struct {
@@ -226,7 +227,7 @@ func ModifyUserInfo(c *gin.Context) {
 			UserName: userName,
 		},
 	}
-	response, err := GrpcUerServiceClient.GetUserIdByUserName(context.Background(), request)
+	response, err := GrpcUerServiceClient.GetUserInfoByUserName(context.Background(), request)
 	if err != nil {
 		fmt.Println("GrpcUerServiceClient.GetUserIdByUserName Error:", err.Error())
 		c.JSON(http.StatusOK, err.Error())
@@ -360,6 +361,7 @@ func QueryUserInfo(c *gin.Context) {
 			UserName: response.UserInfo.UserName,
 			NumFans:  response.UserInfo.NumFans,
 			NumIdols: response.UserInfo.NumIdols,
+			NumTopic: response.UserInfo.NumTopic,
 		},
 	})
 }
@@ -482,13 +484,3 @@ func QueryUserFansList(c *gin.Context) {
 	})
 
 }
-
-//// CreateTopic 创建话题
-//func CreateTopic(c *gin.Context) {
-//
-//}
-//
-//// DeleteTopic 删除某个话题
-//func DeleteTopic(c *gin.Context) {
-//
-//}
