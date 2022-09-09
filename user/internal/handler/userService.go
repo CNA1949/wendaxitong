@@ -92,3 +92,47 @@ func (u *UserService) GetUserIdByUserName(c context.Context, request *service.Us
 		StatusMessage: msg.StatusMessage,
 	}, nil
 }
+
+func (u *UserService) GetUserInfoByUserName(c context.Context, request *service.UserRequest) (*service.UserResponse, error) {
+	var user repository.UserInfo
+	msg := user.GetUserInfoByUserName(request)
+	if msg.StatusCode != codeMsg.SUCCESS {
+		return &service.UserResponse{
+			StatusCode:    msg.StatusCode,
+			StatusMessage: msg.StatusMessage,
+		}, nil
+	}
+
+	return &service.UserResponse{
+		UserInfo: &service.UserModel{
+			UserId:     user.UserId,
+			UserName:   user.UserName,
+			Password:   user.Password,
+			Phone:      user.Phone,
+			Email:      user.Email,
+			NumFans:    user.NumFans,
+			NumIdols:   user.NumIdols,
+			FansNames:  user.FansNames,
+			IdolsNames: user.IdolsNames,
+		},
+		StatusCode:    msg.StatusCode,
+		StatusMessage: msg.StatusMessage,
+	}, nil
+}
+
+func (u *UserService) FollowUser(ctx context.Context, request *service.UserRequest2) (*service.UserResponse, error) {
+	var user repository.UserInfo
+	msg := user.FollowUser(request)
+	if msg.StatusCode != codeMsg.SUCCESS {
+		return &service.UserResponse{
+			StatusCode:    msg.StatusCode,
+			StatusMessage: msg.StatusMessage,
+		}, nil
+	}
+
+	return &service.UserResponse{
+		UserInfo:      &service.UserModel{},
+		StatusCode:    msg.StatusCode,
+		StatusMessage: msg.StatusMessage,
+	}, nil
+}

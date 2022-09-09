@@ -19,6 +19,18 @@ type User struct {
 	Email    string `json:"email"`
 }
 
+type QUser struct {
+	UserId   uint64 `json:"user_id"`
+	UserName string `json:"user_name"`
+	NumFans  uint64 `json:"num_fans"`
+	NumIdols uint64 `json:"num_idols"`
+}
+
+type Follow struct {
+	IdolName string `json:"idol_name"`
+	Choose   uint64 `json:"choose"`
+}
+
 // UserRegister 用户注册
 func UserRegister(c *gin.Context) {
 	var user service.UserRequest
@@ -315,4 +327,153 @@ func GetAccessToken(c *gin.Context) {
 		"user_name":    user.UserName,
 		"access_token": token,
 	})
+}
+
+// QueryUserInfo 用户查询某个用户的信息
+func QueryUserInfo(c *gin.Context) {
+	var request service.UserRequest
+	err := c.ShouldBind(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.Abort()
+		return
+	}
+
+	response, err := GrpcUerServiceClient.GetUserInfoByUserName(context.Background(), &request)
+	if err != nil {
+		fmt.Println("GrpcUerServiceClient.GetUserInfoByUserName Error:", err.Error())
+		c.JSON(http.StatusOK, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, util.JsonData{
+		Code:    response.StatusCode,
+		Message: response.StatusMessage,
+		Data: QUser{
+			UserId:   response.UserInfo.UserId,
+			UserName: response.UserInfo.UserName,
+			NumFans:  response.UserInfo.NumFans,
+			NumIdols: response.UserInfo.NumIdols,
+		},
+	})
+}
+
+// FollowUser 关注或取消关注用户
+func FollowUser(c *gin.Context) {
+	userName := c.MustGet("userName").(string)
+	if userName == "" {
+		c.JSON(http.StatusOK, "userName为空，参数传递错误")
+		c.Abort()
+		return
+	}
+	var follow Follow
+	err := c.ShouldBind(&follow)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		c.Abort()
+		return
+	}
+
+	if userName == follow.IdolName {
+		c.JSON(http.StatusOK, util.JsonData{
+			Code:    codeMsg.Failed,
+			Message: "用户不可以关注自己！",
+			Data:    "",
+		})
+		c.Abort()
+		return
+	}
+
+	request2 := &service.UserRequest2{
+		UserInfo: &service.UserModel{
+			UserName:   userName,
+			IdolsNames: follow.IdolName,
+		},
+		Choose: follow.Choose,
+	}
+
+	response, err := GrpcUerServiceClient.FollowUser(context.Background(), request2)
+	if err != nil {
+		fmt.Println("GrpcUerServiceClient.FollowUser Error:", err.Error())
+		c.JSON(http.StatusOK, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, util.JsonData{
+		Code:    response.StatusCode,
+		Message: response.StatusMessage,
+		Data:    "",
+	})
+}
+
+// QueryUserIdolsList 查询所有已关注的用户
+func QueryUserIdolsList(c *gin.Context) {
+	userName := c.MustGet("userName").(string)
+	if userName == "" {
+		c.JSON(http.StatusOK, "userName为空，参数传递错误")
+		c.Abort()
+		return
+	}
+
+	request := &service.UserRequest{
+		UserInfo: &service.UserModel{
+			UserName: userName,
+		},
+	}
+
+	response, err := GrpcUerServiceClient.GetUserInfoByUserName(context.Background(), request)
+	if err != nil {
+		fmt.Println("GrpcUerServiceClient.GetUserInfoByUserName Error:", err.Error())
+		c.JSON(http.StatusOK, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, util.JsonData{
+		Code:    response.StatusCode,
+		Message: response.StatusMessage,
+		Data: gin.H{
+			"当前用户":  response.UserInfo.UserName,
+			"关注用户数": response.UserInfo.NumIdols,
+			"关注用户":  response.UserInfo.IdolsNames,
+		},
+	})
+
+}
+
+// QueryUserFansList 查询用户拥有的粉丝
+func QueryUserFansList(c *gin.Context) {
+	userName := c.MustGet("userName").(string)
+	if userName == "" {
+		c.JSON(http.StatusOK, "userName为空，参数传递错误")
+		c.Abort()
+		return
+	}
+
+	request := &service.UserRequest{
+		UserInfo: &service.UserModel{
+			UserName: userName,
+		},
+	}
+
+	response, err := GrpcUerServiceClient.GetUserInfoByUserName(context.Background(), request)
+	if err != nil {
+		fmt.Println("GrpcUerServiceClient.GetUserInfoByUserName Error:", err.Error())
+		c.JSON(http.StatusOK, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, util.JsonData{
+		Code:    response.StatusCode,
+		Message: response.StatusMessage,
+		Data: gin.H{
+			"当前用户":  response.UserInfo.UserName,
+			"用户粉丝数": response.UserInfo.NumFans,
+			"用户粉丝":  response.UserInfo.FansNames,
+		},
+	})
+
 }

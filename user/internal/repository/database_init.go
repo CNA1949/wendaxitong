@@ -52,3 +52,16 @@ func UpdateValueById(idName string, id interface{}, model interface{}, attribute
 	tx.Commit() // 提交事务
 	return nil
 }
+
+// UpdateValueByName 根据用户名，更新某个字段的值
+func UpdateValueByName(fieldName string, userName string, model interface{}, attribute string, newValue interface{}) error {
+	query := fieldName + " = ?"
+	tx := DB.Begin() //开启事务
+	err := DB.Model(&model).Where(query, userName).Update(attribute, newValue).Error
+	if err != nil {
+		tx.Rollback() // 遇到错误时回滚事务
+		return err
+	}
+	tx.Commit() // 提交事务
+	return nil
+}

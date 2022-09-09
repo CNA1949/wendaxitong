@@ -43,13 +43,15 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 
 修改个人信息（已完成）
 
+用户查看其他用户信息（已完成）
+
 ### 关注与取消关注
 
-查看用户信息（待完成）
+关注/取消关注用户（已完成）
 
-关注/取消关注用户（待完成）
+查看所有已关注用户（已完成）
 
-查看所有已关注用户（待完成）
+查看所有粉丝（已完成）
 
 
 
@@ -99,6 +101,10 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 |   created_at    | varchar  | not null |        |      |            用户注册时间            |
 |   updated_at    | varchar  | not null |        |      |          用户信息更新时间          |
 | last_login_time | varchar  | not null |        |      |          用户最近登录时间          |
+
+
+
+### 关注信息表
 
 
 

@@ -67,3 +67,14 @@ func DeleteKeyValue(key string) error {
 	}
 	return nil
 }
+
+// DeleteAllKeyValue 删除指定key
+func DeleteAllKeyValue() error {
+	v, err := ConnRedis.Do("flushdb")
+	fmt.Println(v)
+	if err != nil {
+		fmt.Println("DeleteKey err:", err.Error())
+		return err
+	}
+	return nil
+}
