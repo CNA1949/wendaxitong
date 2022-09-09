@@ -15,16 +15,12 @@ message UserModel{
   string email = 5;
   uint64  num_fans = 6;
   uint64  num_idols = 7;
-  string fans_names = 8;
-  string idols_names = 9;
+  uint64 num_topic = 8;
+  string fans_names = 9;
+  string idols_names = 10;
 }
 
-message UserInfoModel{
-  uint64  userId = 1;
-  string userName = 2;
-  uint64  num_fans = 6;
-  uint64  num_idols = 7;
-}
+
 
 // request model
 // 消息 传输对象
@@ -44,11 +40,6 @@ message UserResponse{
   UserModel userInfo = 3;
 }
 
-message UserInfoResponse{
-  uint64 status_code = 1;
-  string status_message = 2;
-  UserInfoModel userInfo = 3;
-}
 
 
 

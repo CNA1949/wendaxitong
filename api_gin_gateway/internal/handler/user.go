@@ -12,11 +12,16 @@ import (
 )
 
 type User struct {
-	UserId   uint64 `json:"user_id"`
-	UserName string `json:"user_name"`
-	Password string `json:"password"`
-	Phone    string `json:"phone"`
-	Email    string `json:"email"`
+	UserId     uint64 `gorm:"primary_key;auto_increment" json:"user_id"`
+	UserName   string `gorm:"not null;unique" json:"user_name"`
+	Phone      string `json:"phone"`
+	Email      string `json:"email"`
+	NumFans    uint64 `json:"num_fans"`
+	NumIdols   uint64 `json:"num_idols"`
+	NumTopic   uint64 `json:"num_topic"`
+	Password   string `gorm:"not null" json:"password"`
+	FansNames  string `json:"fans_names"`
+	IdolsNames string `json:"idols_names"`
 }
 
 type QUser struct {
@@ -477,3 +482,13 @@ func QueryUserFansList(c *gin.Context) {
 	})
 
 }
+
+//// CreateTopic 创建话题
+//func CreateTopic(c *gin.Context) {
+//
+//}
+//
+//// DeleteTopic 删除某个话题
+//func DeleteTopic(c *gin.Context) {
+//
+//}

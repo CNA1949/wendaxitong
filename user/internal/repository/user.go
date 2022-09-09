@@ -17,6 +17,7 @@ type UserInfo struct {
 	Email         string    `json:"email"`
 	NumFans       uint64    `json:"num_fans"`
 	NumIdols      uint64    `json:"num_idols"`
+	NumTopic      uint64    `json:"num_topic"`
 	Password      string    `gorm:"not null" json:"password"`
 	CreatedAt     time.Time `json:"created_at"`      // 用户注册时间
 	UpdatedAt     time.Time `json:"updated_at"`      // 用户信息更新时间
@@ -203,7 +204,7 @@ func (user *UserInfo) GetUserInfoByUserName(request *service.UserRequest) codeMs
 	if err != nil {
 		return codeMsg.CodeMessage{StatusCode: codeMsg.Failed, StatusMessage: err.Error()}
 	}
-	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "获取成功"}
+	return codeMsg.CodeMessage{StatusCode: codeMsg.SUCCESS, StatusMessage: "查询成功"}
 }
 
 // GetUserInfoByUserId 根据用户ID获取用户信息
