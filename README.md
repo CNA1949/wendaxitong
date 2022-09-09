@@ -89,20 +89,20 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 
 ### 用户信息表
 
-|    字段名称     | 数据类型 |   null   | 唯一性 |  键  |                说明                |
-| :-------------: | :------: | :------: | :----: | :--: | :--------------------------------: |
-|     user_id     |   int    | not null | unique | 主键 |               用户id               |
-|    user_name    | varchar  | not null | unique |      |               用户名               |
-|      phone      | varchar  |   null   |        |      |             用户手机号             |
-|      email      | varchar  |   null   |        |      |              用户邮箱              |
-|    num_fans     |   int    |   null   |        |      |    用户粉丝数（即被关注的数量）    |
-|    num_idols    |   int    |   null   |        |      | 用户关注数（即用户关注的用户数量） |
-|    password     | varchar  | not null |        |      |              用户密码              |
-|   fans_names    | varchar  |   null   |        |      |              用户粉丝              |
-|   idols_names   | varchar  |   null   |        |      |             关注的用户             |
-|   created_at    | varchar  | not null |        |      |            用户注册时间            |
-|   updated_at    | varchar  | not null |        |      |          用户信息更新时间          |
-| last_login_time | varchar  | not null |        |      |          用户最近登录时间          |
+|    字段名称     | 数据类型 |   null   | 唯一性 |  键  |       说明       |
+| :-------------: | :------: | :------: | :----: | :--: | :--------------: |
+|     user_id     |   int    | not null | unique | 主键 |      用户id      |
+|    user_name    | varchar  | not null | unique |      |      用户名      |
+|      phone      | varchar  |   null   |        |      |    用户手机号    |
+|      email      | varchar  |   null   |        |      |     用户邮箱     |
+|    num_fans     |   int    |   null   |        |      |    用户粉丝数    |
+|    num_idols    |   int    |   null   |        |      |    用户关注数    |
+|    password     | varchar  | not null |        |      |     用户密码     |
+|   fans_names    | varchar  |   null   |        |      |     用户粉丝     |
+|   idols_names   | varchar  |   null   |        |      |    关注的用户    |
+|   created_at    | varchar  | not null |        |      |   用户注册时间   |
+|   updated_at    | varchar  | not null |        |      | 用户信息更新时间 |
+| last_login_time | varchar  | not null |        |      | 用户最近登录时间 |
 
 
 
