@@ -97,6 +97,7 @@ API测试文档链接：https://console-docs.apipost.cn/preview/420f53fda19e0517
 |      email      | varchar  |   null   |        |      |     用户邮箱     |
 |    num_fans     |   int    |   null   |        |      |    用户粉丝数    |
 |    num_idols    |   int    |   null   |        |      |    用户关注数    |
+|    num_topic    |   int    |   null   |        |      |  所创建的话题数  |
 |    password     | varchar  | not null |        |      |     用户密码     |
 |   fans_names    | varchar  |   null   |        |      |     用户粉丝     |
 |   idols_names   | varchar  |   null   |        |      |    关注的用户    |
